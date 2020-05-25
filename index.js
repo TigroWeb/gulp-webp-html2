@@ -5,7 +5,7 @@ const through = require('through2');
 const pluginName = 'gulp-webp-html2';
 
 module.exports = function () {
-	var extensions = ['.jpg', '.png', '.jpeg', '.JPG'];
+	var extensions = ['.jpg', '.png', '.jpeg'];
 	return through.obj(function (file, enc, cb) {
 		if (file.isNull()) {
 			cb(null, file);
@@ -36,15 +36,21 @@ module.exports = function () {
 							.map(function (subLine) {
 								var lineImg = (SplitImg + subLine).toString();
 								if (ReImg.test(lineImg)) {
+									subLine = lineImg;
 									var regexpArray = lineImg.match(ReImg);
 									var imgTag = regexpArray[0];
 									var newUrl = regexpArray[2];
-									if (newUrl.indexOf('.webp') < 0) {
+									if (! ~ newUrl.indexOf('.webp')) {
 										for (var k in extensions) {
-											newUrl = newUrl.replace(extensions[k], '.webp');
+											if (~ newUrl.indexOf(extensions[k])) {
+												newUrl = newUrl.replace(extensions[k], '.webp');
+												var newHTML = '<picture><source srcset="'
+													+ newUrl + '" type="image/webp">'
+													+ imgTag + '</picture>';
+												subLine = lineImg.replace(imgTag, newHTML);
+												break;
+											}
 										}
-										var newHTML = '<picture><source srcset="' + newUrl + '" type="image/webp">' + imgTag + '</picture>';
-										subLine = lineImg.replace(imgTag, newHTML);
 									}
 								}
 								return subLine;
