@@ -20,7 +20,6 @@ module.exports = function () {
 			var RePicture = /([\s\S]*?<\/picture>)([\s\S]*)/;
 			var SplitImg = '<img ';
 			var ReImg = /<img([^>]*)src=[\"\'](\S+)[\"\']([^>]*)>/;
-			//
 			const data = file.contents.toString()
 				.split(SplitPicture)
 				.map(function (line) {
@@ -40,7 +39,8 @@ module.exports = function () {
 									var regexpArray = lineImg.match(ReImg);
 									var imgTag = regexpArray[0];
 									var newUrl = regexpArray[2];
-									if (! ~ newUrl.indexOf('.webp')) {
+									if (! ~ newUrl.indexOf('.webp')
+										&& ! /\sdata-no-webp[\=\s]/g.test(imgTag)) {
 										for (var k in extensions) {
 											if (~ newUrl.indexOf(extensions[k])) {
 												newUrl = newUrl.replace(extensions[k], '.webp');
@@ -61,7 +61,6 @@ module.exports = function () {
 					return picture + line;
 				})
 				.join(SplitPicture);
-			//
 			file.contents = new Buffer(data);
 			this.push(file);
 		} catch (err) {
